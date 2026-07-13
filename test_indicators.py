@@ -1,0 +1,40 @@
+import yfinance as yf
+
+from indicators import (
+    add_ema,
+    add_rsi,
+    add_macd,
+    add_atr,
+    add_adx,
+)
+
+print("Veri indiriliyor...")
+
+df = yf.download(
+    "THYAO.IS",
+    period="6mo",
+    auto_adjust=True,
+    progress=False
+)
+
+df = add_ema(df)
+df = add_rsi(df)
+df = add_macd(df)
+df = add_atr(df)
+df = add_adx(df)
+
+print(
+    df[
+        [
+            "Close",
+            "EMA20",
+            "EMA50",
+            "EMA200",
+            "RSI",
+            "MACD",
+            "MACD_SIGNAL",
+            "ATR",
+            "ADX",
+        ]
+    ].tail()
+)
