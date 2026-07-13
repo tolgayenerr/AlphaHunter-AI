@@ -1,6 +1,11 @@
+import os
+import sys
+import pandas as pd
 import yfinance as yf
 
-from indicators import (
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from core.indicators import (
     add_ema,
     add_rsi,
     add_macd,
@@ -16,6 +21,9 @@ df = yf.download(
     auto_adjust=True,
     progress=False
 )
+# MultiIndex'i düzleştir
+if isinstance(df.columns, pd.MultiIndex):
+    df.columns = df.columns.get_level_values(0)
 
 df = add_ema(df)
 df = add_rsi(df)
