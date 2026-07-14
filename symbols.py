@@ -29,7 +29,6 @@ BIST_SYMBOLS = [
     "ISCTR.IS",
     "ISDMR.IS",
     "KCHOL.IS",
-    "TRALT.IS",
     "TRMET.IS",
     "KRDMD.IS",
     "MGROS.IS",

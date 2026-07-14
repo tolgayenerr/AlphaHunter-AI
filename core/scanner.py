@@ -13,7 +13,7 @@ from core.indicators import (
 
 def scan_market():
 
-    all_data = []
+    market = {}
 
     for symbol in BIST_SYMBOLS:
 
@@ -40,9 +40,10 @@ def scan_market():
 
             df["Symbol"] = symbol
 
-            all_data.append(df.iloc[-1])
+            market[symbol] = df
 
         except Exception as e:
-            print(symbol, e)
 
-    return pd.DataFrame(all_data)
+            print(f"{symbol} -> {e}")
+
+    return market
