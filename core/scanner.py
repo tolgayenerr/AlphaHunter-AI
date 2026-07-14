@@ -2,6 +2,7 @@ import yfinance as yf
 import pandas as pd
 
 from symbols import BIST_SYMBOLS
+
 from core.indicators import (
     add_ema,
     add_rsi,
@@ -23,8 +24,11 @@ def scan_market():
                 symbol,
                 period="2y",
                 auto_adjust=True,
-                progress=False
+                progress=False,
             )
+
+            if df.empty:
+                continue
 
             if isinstance(df.columns, pd.MultiIndex):
                 df.columns = df.columns.get_level_values(0)
@@ -37,6 +41,22 @@ def scan_market():
             df = add_macd(df)
             df = add_atr(df)
             df = add_adx(df)
+
+            # Sadece AI'nın kullandığı kolonlarda NaN olan satırları sil
+            df = df.dropna(
+                subset=[
+                    "EMA20",
+                    "EMA50",
+                    "EMA200",
+                    "RSI",
+                    "MACD",
+                    "ATR",
+                    "ADX",
+                ]
+            )
+
+            if len(df) == 0:
+                continue
 
             df["Symbol"] = symbol
 

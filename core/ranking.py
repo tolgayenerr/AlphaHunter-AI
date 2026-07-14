@@ -21,10 +21,14 @@ def build_results(results):
 def filter_opportunities(df):
 
     return df[
-        (df["Signal"] == "BUY") &
-        (df["Confidence"] >= 70) &
-        (df["Alpha"] >= 60) &
+        (df["Signal"] == "BUY")
+        &
+        (df["Confidence"] >= 60)
+        &
+        (df["Alpha"] >= 40)
+        &
         (df["RR"] >= 2)
+        
     ]
 
 
