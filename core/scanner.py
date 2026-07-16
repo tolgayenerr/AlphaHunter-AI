@@ -67,3 +67,4 @@ def scan_market():
             print(f"{symbol} -> {e}")
 
     return market
+    print(df.columns.tolist())

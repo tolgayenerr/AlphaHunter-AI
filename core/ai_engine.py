@@ -13,6 +13,8 @@ from sklearn.ensemble import (
 )
 from sklearn.model_selection import TimeSeriesSplit
 
+from core.alpha_score import calculate_alpha_score
+
 
 FEATURES = [
     "EMA20",
@@ -29,20 +31,16 @@ def train_models(df):
 
     df = df.copy()
 
-    # 5 gün sonraki getiri
     df["FutureReturn"] = (
         df["Close"].shift(-5) / df["Close"] - 1
     )
 
-    # %2 üzeri yükseliş = BUY
     df["Target"] = (
         df["FutureReturn"] > 0.02
     ).astype(int)
 
-    # Sadece gerekli kolonlarda NaN temizle
     df = df.dropna(subset=FEATURES + ["Target"])
 
-    # Yeterli veri yoksa modeli eğitme
     if len(df) < 100:
         return None
 
@@ -92,11 +90,9 @@ def train_models(df):
 
 def ensemble_predict(models, row):
 
-    # Model oluşturulamadıysa
     if models is None:
         return "HOLD", 0.0
 
-    # Son satırda eksik veri varsa
     if row[models["features"]].isna().any():
         return "HOLD", 0.0
 
@@ -127,3 +123,56 @@ def ensemble_predict(models, row):
     signal = "BUY" if probability >= 0.50 else "SELL"
 
     return signal, confidence
+
+
+def run_ai_engine(market):
+    """
+    Market taranır.
+    Her hisse için AI tahmini yapılır.
+    Sonuç listesi döndürülür.
+    """
+
+    results = []
+
+    for symbol, df in market.items():
+
+        try:
+
+            models = train_models(df)
+
+            if models is None:
+                continue
+
+            row = df.iloc[-1]
+
+            signal, confidence = ensemble_predict(
+                models,
+                row,
+            )
+
+            alpha = calculate_alpha_score(
+                row,
+                confidence,
+            )
+
+            atr = row["ATR"]
+
+            rr = round(2.0 + (row["ADX"] / 50), 2)
+
+            results.append(
+                {
+                    "Symbol": symbol,
+                    "Signal": signal,
+                    "Confidence": confidence,
+                    "Alpha": alpha,
+                    "Close": round(row["Close"], 2),
+                    "ATR": round(atr, 2),
+                    "RR": rr,
+                }
+            )
+
+        except Exception as e:
+
+            print(f"{symbol} -> {e}")
+
+    return results
